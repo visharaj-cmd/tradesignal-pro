@@ -1,2 +1,2 @@
 # tradesignal-pro
-Trading Signals (buy or sell)
+Exported from Caffeine project: TradeSignal Pro
