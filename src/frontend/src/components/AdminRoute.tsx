@@ -1,6 +1,6 @@
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { useAdmin } from "@/contexts/AdminContext";
 import type { ReactNode } from "react";
-import { useAdmin } from "../contexts/AdminContext";
-import { LoadingSpinner } from "./ui/LoadingSpinner";
 
 interface AdminRouteProps {
   children: ReactNode;

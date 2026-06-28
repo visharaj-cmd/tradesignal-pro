@@ -1,23 +1,18 @@
 {
-  "overview": "TradeSignal Pro is a premium trading signal platform where admins post trade signals with screenshots, mark outcomes as success or failed, and manage subscriptions. Users subscribe via UPI payment and get access to real-time trade signals, stats, and history. Non-subscribers can preview successful past trades to build trust before buying.",
+  "overview": "IGNOU Services - Professional student services platform with admin-editable content",
   "features": [
-    "Trading signals with screenshots and outcome tracking",
-    "Subscription-based access via UPI manual payment",
-    "Non-subscriber preview of successful past trades",
-    "Admin optional proof upload when marking trade success",
-    "Premium payment page with live trust stats (win rate, active subscribers, total signals)",
-    "User profiles with red verified tick for active subscribers",
-    "Admin panel: signal management, payment approval, settings"
+    "Dark theme landing page with IGNOU branding",
+    "Editable service cards grid",
+    "Admin panel for content management",
+    "Lead capture system",
+    "Contact details management"
   ],
-  "category": "finance",
+  "category": "showcase",
   "tags": [
-    "trading",
-    "signals",
-    "subscription",
-    "finance",
-    "admin",
-    "upi",
-    "payment"
+    "education",
+    "student-services",
+    "admin-panel",
+    "landing-page"
   ],
-  "last_updated": "2026-04-12T01:41:51.956Z"
+  "last_updated": "2026-06-24T13:31:55.476Z"
 }

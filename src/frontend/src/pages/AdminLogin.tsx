@@ -1,7 +1,18 @@
-import { Eye, EyeOff, Loader2, Lock, ShieldCheck } from "lucide-react";
+import { useAdmin } from "@/contexts/AdminContext";
+import {
+  Crown,
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Shield,
+  ShieldCheck,
+  UserCheck,
+  Zap,
+} from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAdmin } from "../contexts/AdminContext";
 
 const ADMIN_PASSWORD = "11760000";
 
@@ -12,6 +23,9 @@ export default function AdminLogin() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<"admin" | "superadmin">(
+    "admin",
+  );
 
   useEffect(() => {
     if (isAdmin) window.location.replace("/admin");
@@ -27,8 +41,12 @@ export default function AdminLogin() {
     setError(null);
     await new Promise((r) => setTimeout(r, 450));
     if (password === ADMIN_PASSWORD) {
-      setAdminStatus(true);
-      toast.success("Welcome back, Admin");
+      const role = selectedRole;
+      setAdminStatus(true, role);
+      const roleLabel = role === "superadmin" ? "Superadmin" : "Admin";
+      toast.success(`Welcome back, ${roleLabel}`, {
+        description: "Access granted to IGNOU control panel.",
+      });
       window.location.replace("/admin");
     } else {
       setError("Incorrect password. Please try again.");
@@ -42,85 +60,150 @@ export default function AdminLogin() {
       {/* Ambient background glows */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div
-          className="absolute left-1/2 top-1/3 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30"
+          className="absolute left-1/2 top-1/3 rounded-full -translate-x-1/2 -translate-y-1/2"
           style={{
+            width: 700,
+            height: 700,
             background:
-              "radial-gradient(circle, oklch(0.72 0.19 220 / 0.18) 0%, transparent 70%)",
+              "radial-gradient(circle, oklch(0.72 0.17 70 / 0.15) 0%, transparent 70%)",
+            filter: "blur(60px)",
           }}
         />
         <div
-          className="absolute right-0 bottom-0 h-[400px] w-[400px] rounded-full opacity-20"
+          className="absolute right-0 bottom-0 rounded-full"
           style={{
+            width: 420,
+            height: 420,
             background:
-              "radial-gradient(circle, oklch(0.76 0.21 210 / 0.15) 0%, transparent 70%)",
+              "radial-gradient(circle, oklch(0.58 0.14 25 / 0.12) 0%, transparent 70%)",
+            filter: "blur(70px)",
           }}
         />
         <div
-          className="absolute left-0 top-0 h-[300px] w-[300px] rounded-full opacity-15"
+          className="absolute left-0 top-0 rounded-full"
           style={{
+            width: 320,
+            height: 320,
             background:
-              "radial-gradient(circle, oklch(0.65 0.25 142 / 0.1) 0%, transparent 70%)",
+              "radial-gradient(circle, oklch(0.72 0.17 70 / 0.1) 0%, transparent 70%)",
+            filter: "blur(60px)",
           }}
         />
       </div>
 
       <div className="relative w-full max-w-sm">
-        {/* Branding header */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-5">
+        {/* Brand header */}
+        <motion.div
+          initial={{ opacity: 0, y: -24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55 }}
+          className="flex flex-col items-center mb-8"
+        >
+          {/* Logo */}
+          <div className="relative mb-6">
             <div
-              className="flex h-20 w-20 items-center justify-center rounded-2xl border border-primary/30 shadow-[0_0_32px_oklch(0.72_0.19_220/0.25)]"
+              className="w-20 h-20 rounded-2xl flex items-center justify-center"
               style={{
                 background:
-                  "linear-gradient(135deg, oklch(0.72 0.19 220 / 0.2) 0%, oklch(0.76 0.21 210 / 0.15) 100%)",
+                  "linear-gradient(135deg, oklch(0.72 0.17 70 / 0.2) 0%, oklch(0.58 0.14 25 / 0.15) 100%)",
+                border: "1px solid oklch(0.72 0.17 70 / 0.3)",
+                boxShadow: "0 0 24px oklch(0.72 0.17 70 / 0.2)",
               }}
             >
-              <ShieldCheck className="h-10 w-10 text-primary" />
+              <span className="font-display font-bold text-primary text-2xl">
+                I
+              </span>
             </div>
-            {/* Outer ring glow */}
-            <div className="absolute -inset-1.5 rounded-3xl border border-primary/15 pointer-events-none" />
           </div>
-          <h1 className="text-heading-2 tracking-tight">Admin Panel</h1>
-          <p className="text-sm text-muted-foreground mt-1 text-center">
-            TradeSignal Pro · Administration Portal
-          </p>
+
+          {/* Brand name */}
+          <div className="text-center mb-3">
+            <h1 className="font-display font-black text-2xl tracking-tight mb-0.5 text-foreground">
+              IGNOU
+            </h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-primary/70">
+              Student Services
+            </p>
+          </div>
+
+          {/* Admin badge */}
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full border text-xs font-semibold bg-primary/10 border-primary/30 text-primary">
+            <Shield className="w-3 h-3" />
+            Administration Portal
+          </div>
 
           {/* Trust indicators */}
           <div className="flex items-center gap-4 mt-4">
-            {["Encrypted", "2FA Protected", "Restricted"].map((label) => (
+            {["Encrypted", "Restricted", "Secure"].map((label) => (
               <div key={label} className="flex items-center gap-1.5">
-                <div className="h-1.5 w-1.5 rounded-full bg-success opacity-80" />
+                <div className="h-1.5 w-1.5 rounded-full bg-success shadow-[0_0_5px_oklch(var(--success)/0.6)]" />
                 <span className="text-xs text-muted-foreground font-mono">
                   {label}
                 </span>
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Login card */}
-        <div className="card-elevated p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.55 }}
+          className="card-elevated p-6"
+        >
           {error && (
-            <div
-              className="mb-5 rounded-lg border px-4 py-3 text-sm flex items-center gap-2.5"
-              style={{
-                background: "oklch(var(--destructive) / 0.08)",
-                borderColor: "oklch(var(--destructive) / 0.3)",
-                color: "oklch(var(--destructive))",
-              }}
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-5 rounded-xl px-4 py-3 text-sm flex items-center gap-2.5 border bg-destructive/10 border-destructive/30 text-destructive"
+              data-ocid="admin.error_state"
             >
               <Lock className="h-4 w-4 shrink-0" />
               {error}
-            </div>
+            </motion.div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Role selector */}
+            <div className="space-y-2">
+              <span className="text-label">Select Role</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("admin")}
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-smooth border ${
+                    selectedRole === "admin"
+                      ? "bg-primary/15 border-primary/40 text-primary"
+                      : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                  data-ocid="admin.role.admin_button"
+                >
+                  <UserCheck className="h-4 w-4" />
+                  Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole("superadmin")}
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-smooth border ${
+                    selectedRole === "superadmin"
+                      ? "bg-accent/15 border-accent/40 text-accent"
+                      : "bg-secondary border-border text-muted-foreground hover:text-foreground"
+                  }`}
+                  data-ocid="admin.role.superadmin_button"
+                >
+                  <Crown className="h-4 w-4" />
+                  Superadmin
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="admin-password" className="text-label">
                 Admin Password
               </label>
               <div
-                className={`relative transition-smooth rounded-lg ${isFocused ? "shadow-[0_0_0_2px_oklch(0.72_0.19_220/0.3)]" : ""}`}
+                className={`relative transition-smooth rounded-lg ${isFocused ? "shadow-[0_0_0_2px_oklch(0.72_0.17_70/0.3)]" : ""}`}
               >
                 <input
                   id="admin-password"
@@ -136,7 +219,7 @@ export default function AdminLogin() {
                   autoComplete="current-password"
                   disabled={isSubmitting}
                   className="input-premium w-full pr-11 disabled:opacity-50"
-                  data-ocid="admin-password-input"
+                  data-ocid="admin.password.input"
                 />
                 <button
                   type="button"
@@ -163,7 +246,7 @@ export default function AdminLogin() {
               type="submit"
               disabled={isSubmitting || !password.trim()}
               className="button-primary w-full h-11 flex items-center justify-center gap-2 text-sm"
-              data-ocid="admin-login-btn"
+              data-ocid="admin.submit_button"
             >
               {isSubmitting ? (
                 <>
@@ -172,27 +255,27 @@ export default function AdminLogin() {
                 </>
               ) : (
                 <>
-                  <ShieldCheck className="h-4 w-4" />
+                  <Zap className="h-4 w-4" />
                   Access Admin Panel
+                  <ShieldCheck className="h-4 w-4" />
                 </>
               )}
             </button>
           </form>
-        </div>
+        </motion.div>
 
-        <div className="flex items-center justify-center gap-2 mt-6">
-          <div
-            className="h-px flex-1"
-            style={{ background: "oklch(var(--border))" }}
-          />
-          <p className="text-xs text-muted-foreground px-3">
-            Restricted Area · Authorized Personnel Only
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.45 }}
+          className="flex items-center justify-center gap-2 mt-6"
+        >
+          <div className="h-px flex-1 bg-border/30" />
+          <p className="text-xs text-muted-foreground px-3 font-mono">
+            Restricted · Authorized Personnel Only
           </p>
-          <div
-            className="h-px flex-1"
-            style={{ background: "oklch(var(--border))" }}
-          />
-        </div>
+          <div className="h-px flex-1 bg-border/30" />
+        </motion.div>
       </div>
     </div>
   );

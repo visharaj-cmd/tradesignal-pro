@@ -1,13 +1,2 @@
-import Storage "mo:caffeineai-object-storage/Storage";
-
-module {
-  public type UpiConfig = {
-    var upiId : Text;
-    var qrCodeBlob : ?Storage.ExternalBlob;
-  };
-
-  public type UpiConfigPublic = {
-    upiId : Text;
-    qrCodeBlob : ?Storage.ExternalBlob;
-  };
-};
+// Removed — FLASH USDT does not use UPI config
+module {};

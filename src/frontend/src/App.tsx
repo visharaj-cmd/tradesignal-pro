@@ -7,27 +7,15 @@ import {
 } from "@tanstack/react-router";
 import { Suspense, lazy } from "react";
 import { AdminRoute } from "./components/AdminRoute";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import { AdminLayout } from "./components/layout/AdminLayout";
-import { Layout } from "./components/layout/Layout";
 import { LoadingSpinner } from "./components/ui/LoadingSpinner";
 import { Toast } from "./components/ui/Toast";
 import { AdminProvider } from "./contexts/AdminContext";
-import { AuthProvider } from "./contexts/AuthContext";
 
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Payment = lazy(() => import("./pages/Payment"));
-const Profile = lazy(() => import("./pages/Profile"));
-const GetCertificate = lazy(() => import("./pages/GetCertificate"));
-const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
-const AdminOverview = lazy(() => import("./pages/admin/AdminOverview"));
-const AdminSignals = lazy(() => import("./pages/admin/AdminSignals"));
-const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
-const AdminCertificates = lazy(() => import("./pages/admin/AdminCertificates"));
 
 function PageLoader() {
   return (
@@ -40,98 +28,25 @@ function PageLoader() {
 // Root route
 const rootRoute = createRootRoute({
   component: () => (
-    <AuthProvider>
-      <AdminProvider>
-        <Outlet />
-        <Toast />
-      </AdminProvider>
-    </AuthProvider>
+    <AdminProvider>
+      <Outlet />
+      <Toast />
+    </AdminProvider>
   ),
 });
 
-// Public routes
-const loginRoute = createRoute({
+// Public landing page
+const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
-  path: "/login",
+  path: "/",
   component: () => (
     <Suspense fallback={<PageLoader />}>
-      <Login />
+      <LandingPage />
     </Suspense>
   ),
 });
 
-const signupRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/signup",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <Signup />
-    </Suspense>
-  ),
-});
-
-const verifyCertRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/verify-cert",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <VerifyCertificate />
-    </Suspense>
-  ),
-});
-
-// Protected user routes
-const protectedLayout = createRoute({
-  getParentRoute: () => rootRoute,
-  id: "protected",
-  component: () => (
-    <ProtectedRoute>
-      <Layout />
-    </ProtectedRoute>
-  ),
-});
-
-const dashboardRoute = createRoute({
-  getParentRoute: () => protectedLayout,
-  path: "/dashboard",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <Dashboard />
-    </Suspense>
-  ),
-});
-
-const paymentRoute = createRoute({
-  getParentRoute: () => protectedLayout,
-  path: "/payment",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <Payment />
-    </Suspense>
-  ),
-});
-
-const profileRoute = createRoute({
-  getParentRoute: () => protectedLayout,
-  path: "/profile",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <Profile />
-    </Suspense>
-  ),
-});
-
-const certificateRoute = createRoute({
-  getParentRoute: () => protectedLayout,
-  path: "/certificates",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <GetCertificate />
-    </Suspense>
-  ),
-});
-
-// Admin routes
+// Admin login
 const adminLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/admin/login",
@@ -142,6 +57,7 @@ const adminLoginRoute = createRoute({
   ),
 });
 
+// Admin layout (protected)
 const adminLayout = createRoute({
   getParentRoute: () => rootRoute,
   id: "admin",
@@ -152,36 +68,40 @@ const adminLayout = createRoute({
   ),
 });
 
+// Admin dashboard (default admin page)
 const adminIndexRoute = createRoute({
   getParentRoute: () => adminLayout,
   path: "/admin",
   component: () => (
     <Suspense fallback={<PageLoader />}>
-      <AdminOverview />
+      <AdminDashboard />
     </Suspense>
   ),
 });
 
-const adminSignalsRoute = createRoute({
+// Admin services page (reuses dashboard with services tab active)
+const adminServicesRoute = createRoute({
   getParentRoute: () => adminLayout,
-  path: "/admin/signals",
+  path: "/admin/services",
   component: () => (
     <Suspense fallback={<PageLoader />}>
-      <AdminSignals />
+      <AdminDashboard />
     </Suspense>
   ),
 });
 
-const adminPaymentsRoute = createRoute({
+// Admin contact page (reuses dashboard with contact tab active)
+const adminContactRoute = createRoute({
   getParentRoute: () => adminLayout,
-  path: "/admin/payments",
+  path: "/admin/contact",
   component: () => (
     <Suspense fallback={<PageLoader />}>
-      <AdminPayments />
+      <AdminDashboard />
     </Suspense>
   ),
 });
 
+// Admin settings page
 const adminSettingsRoute = createRoute({
   getParentRoute: () => adminLayout,
   path: "/admin/settings",
@@ -192,44 +112,14 @@ const adminSettingsRoute = createRoute({
   ),
 });
 
-const adminCertificatesRoute = createRoute({
-  getParentRoute: () => adminLayout,
-  path: "/admin/certificates",
-  component: () => (
-    <Suspense fallback={<PageLoader />}>
-      <AdminCertificates />
-    </Suspense>
-  ),
-});
-
-// Index redirect
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: () => {
-    window.location.replace("/dashboard");
-    return null;
-  },
-});
-
 const routeTree = rootRoute.addChildren([
   indexRoute,
-  loginRoute,
-  signupRoute,
-  verifyCertRoute,
-  protectedLayout.addChildren([
-    dashboardRoute,
-    paymentRoute,
-    profileRoute,
-    certificateRoute,
-  ]),
   adminLoginRoute,
   adminLayout.addChildren([
     adminIndexRoute,
-    adminSignalsRoute,
-    adminPaymentsRoute,
+    adminServicesRoute,
+    adminContactRoute,
     adminSettingsRoute,
-    adminCertificatesRoute,
   ]),
 ]);
 

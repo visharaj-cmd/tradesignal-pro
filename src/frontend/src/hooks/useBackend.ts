@@ -11,12 +11,10 @@ interface UseBackendResult {
   iiLoginStatus: string;
   ensureUserRole: () => Promise<boolean>;
   claimAdminRoleWithPassword: (password: string) => Promise<boolean>;
+  claimSuperAdminRoleWithPassword: (password: string) => Promise<boolean>;
   loginWithII: () => void;
 }
 
-/**
- * Sleep for `ms` milliseconds.
- */
 function sleep(ms: number) {
   return new Promise<void>((r) => setTimeout(r, ms));
 }
@@ -27,7 +25,6 @@ export function useBackend(): UseBackendResult {
   const [isRegistered, setIsRegistered] = useState(false);
   const registrationAttemptedRef = useRef(false);
 
-  // Detect if current IC principal is anonymous (no Internet Identity login yet)
   const isAnonymousPrincipal =
     !identity || identity.getPrincipal().isAnonymous();
 
@@ -63,7 +60,6 @@ export function useBackend(): UseBackendResult {
         );
 
         if (attempt < MAX_RETRIES) {
-          // Exponential backoff: 1s, 2s, 4s
           const delay = BASE_DELAY_MS * 2 ** attempt;
           console.log(`[useBackend] Retrying in ${delay}ms...`);
           await sleep(delay);
@@ -75,11 +71,6 @@ export function useBackend(): UseBackendResult {
     return false;
   }, [actor, isAnonymousPrincipal]);
 
-  /**
-   * Claim admin role on the backend by proving knowledge of the admin password.
-   * Requires a non-anonymous IC principal (II must be connected first).
-   * Returns true if admin role was successfully granted.
-   */
   const claimAdminRoleWithPassword = useCallback(
     async (password: string): Promise<boolean> => {
       if (!actor) {
@@ -106,7 +97,35 @@ export function useBackend(): UseBackendResult {
     [actor, isAnonymousPrincipal],
   );
 
-  // Auto-register when actor becomes available and principal is non-anonymous
+  const claimSuperAdminRoleWithPassword = useCallback(
+    async (password: string): Promise<boolean> => {
+      if (!actor) {
+        console.warn(
+          "[useBackend] claimSuperAdminRoleWithPassword: actor not ready",
+        );
+        return false;
+      }
+      if (isAnonymousPrincipal) {
+        console.warn(
+          "[useBackend] claimSuperAdminRoleWithPassword: anonymous principal",
+        );
+        return false;
+      }
+      try {
+        const granted = await actor.claimAdminRole(password);
+        console.log("[useBackend] claimSuperAdminRoleWithPassword:", granted);
+        return granted;
+      } catch (err) {
+        console.error(
+          "[useBackend] claimSuperAdminRoleWithPassword failed:",
+          err,
+        );
+        return false;
+      }
+    },
+    [actor, isAnonymousPrincipal],
+  );
+
   useEffect(() => {
     if (!actor || isFetching || isAnonymousPrincipal) return;
     if (registrationAttemptedRef.current) return;
@@ -123,7 +142,6 @@ export function useBackend(): UseBackendResult {
       });
   }, [actor, isFetching, isAnonymousPrincipal]);
 
-  // Reset registration flag when actor or identity changes
   useEffect(() => {
     if (!actor || isAnonymousPrincipal) {
       registrationAttemptedRef.current = false;
@@ -139,6 +157,7 @@ export function useBackend(): UseBackendResult {
     iiLoginStatus: loginStatus,
     ensureUserRole,
     claimAdminRoleWithPassword,
+    claimSuperAdminRoleWithPassword,
     loginWithII: login,
   };
 }
